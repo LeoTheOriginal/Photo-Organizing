@@ -153,20 +153,6 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	bSizer_tools->Add( bSizer_compression_tools, 0, wxEXPAND, 5 );
 
-	wxBoxSizer* bSizer_gauge_tools;
-	bSizer_gauge_tools = new wxBoxSizer( wxVERTICAL );
-
-	m_staticText_created_thumbnails = new wxStaticText( this, wxID_ANY, wxT("Created thumbnails"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText_created_thumbnails->Wrap( -1 );
-	bSizer_gauge_tools->Add( m_staticText_created_thumbnails, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
-
-	m_gauge_done_tasks = new wxGauge( this, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
-	m_gauge_done_tasks->SetValue( 0 );
-	bSizer_gauge_tools->Add( m_gauge_done_tasks, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
-
-
-	bSizer_tools->Add( bSizer_gauge_tools, 0, wxEXPAND, 5 );
-
 	wxBoxSizer* bSizer_selected_source_tools;
 	bSizer_selected_source_tools = new wxBoxSizer( wxVERTICAL );
 
@@ -245,6 +231,20 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	bSizer_tools->Add( bSizer_amount_tools, 0, wxEXPAND, 5 );
 
+	wxBoxSizer* bSizer_gauge_tools;
+	bSizer_gauge_tools = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText_created_thumbnails = new wxStaticText( this, wxID_ANY, wxT("Created thumbnails"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText_created_thumbnails->Wrap( -1 );
+	bSizer_gauge_tools->Add( m_staticText_created_thumbnails, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+	m_gauge_done_tasks = new wxGauge( this, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
+	m_gauge_done_tasks->SetValue( 0 );
+	bSizer_gauge_tools->Add( m_gauge_done_tasks, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+
+	bSizer_tools->Add( bSizer_gauge_tools, 0, wxEXPAND, 5 );
+
 
 	bSizer1->Add( bSizer_tools, 0, wxEXPAND, 5 );
 
@@ -304,8 +304,26 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->Layout();
 
 	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_button_source_select->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_source_selectOnButtonClick ), NULL, this );
+	m_button_destination_select->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_destination_selectOnButtonClick ), NULL, this );
+	m_choice_measurements->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MyFrame1::m_choice_measurementsOnChoice ), NULL, this );
+	m_choice_compression->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MyFrame1::m_choice_compressionOnChoice ), NULL, this );
+	m_button_rotation_left->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_rotation_leftOnButtonClick ), NULL, this );
+	m_button_rotation_right->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_rotation_rightOnButtonClick ), NULL, this );
+	m_button_next_thumbnail->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_next_thumbnailOnButtonClick ), NULL, this );
 }
 
 MyFrame1::~MyFrame1()
 {
+	// Disconnect Events
+	m_button_source_select->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_source_selectOnButtonClick ), NULL, this );
+	m_button_destination_select->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_destination_selectOnButtonClick ), NULL, this );
+	m_choice_measurements->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MyFrame1::m_choice_measurementsOnChoice ), NULL, this );
+	m_choice_compression->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MyFrame1::m_choice_compressionOnChoice ), NULL, this );
+	m_button_rotation_left->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_rotation_leftOnButtonClick ), NULL, this );
+	m_button_rotation_right->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_rotation_rightOnButtonClick ), NULL, this );
+	m_button_next_thumbnail->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::m_button_next_thumbnailOnButtonClick ), NULL, this );
+
 }

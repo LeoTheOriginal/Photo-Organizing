@@ -46,18 +46,28 @@ class MyFrame1 : public wxFrame
 		wxChoice* m_choice_format;
 		wxStaticText* m_staticText_compression;
 		wxChoice* m_choice_compression;
-		wxStaticText* m_staticText_created_thumbnails;
-		wxGauge* m_gauge_done_tasks;
 		wxStaticText* m_staticText_selected_source_const;
 		wxStaticText* m_staticText_selected_source;
 		wxStaticText* m_staticText_selected_destination_const;
 		wxStaticText* m_staticText_selected_destination_text;
 		wxStaticText* m_staticText_amount_const;
 		wxStaticText* m_staticText_amount;
+		wxStaticText* m_staticText_created_thumbnails;
+		wxGauge* m_gauge_done_tasks;
 		wxButton* m_button_rotation_left;
 		wxButton* m_button_rotation_right;
 		wxButton* m_button_next_thumbnail;
 		wxScrolledWindow* m_scrolledWindow1;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void m_button_source_selectOnButtonClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void m_button_destination_selectOnButtonClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void m_choice_measurementsOnChoice( wxCommandEvent& event ) { event.Skip(); }
+		virtual void m_choice_compressionOnChoice( wxCommandEvent& event ) { event.Skip(); }
+		virtual void m_button_rotation_leftOnButtonClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void m_button_rotation_rightOnButtonClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void m_button_next_thumbnailOnButtonClick( wxCommandEvent& event ) { event.Skip(); }
+
 
 	public:
 
