@@ -21,6 +21,8 @@ MyFrame1( parent ), m_compressionLevel(20), m_currentImageIndex(0), m_totalImage
     m_image.AddHandler(new wxPNGHandler);
     m_image.AddHandler(new wxTIFFHandler);
 
+    m_scrolledWindow1->SetBackgroundStyle(wxBG_STYLE_PAINT);
+
     m_scrolledWindow1->Bind(wxEVT_PAINT, &GUIMyFrame1::OnPaint, this);
     m_scrolledWindow1->Bind(wxEVT_SIZE, &GUIMyFrame1::OnSize, this);
 
@@ -79,20 +81,78 @@ void GUIMyFrame1::LoadNextImage()
     if (m_currentImageIndex < m_imagePaths.size())
     {
         wxString currentImagePath = m_imagePaths[m_currentImageIndex];
-        if (m_image.LoadFile(currentImagePath, wxBITMAP_TYPE_ANY))
+        wxString extension = wxFileName(currentImagePath).GetExt().Lower();
+        wxString imagePathToLoad = currentImagePath;
+
+        if (extension == "cr2" || extension == "nef" || extension == "NEF")
+        {
+            wxString relativePath;
+            if (currentImagePath.StartsWith(m_sourceBasePath, &relativePath))
+            {
+                if (relativePath.StartsWith(wxFileName::GetPathSeparator()))
+                {
+                    relativePath = relativePath.Mid(1);
+                }
+            }
+            else
+            {
+                wxLogError(_("The path '%s' does not start with the base path '%s'."), currentImagePath, m_sourceBasePath);
+                return;
+            }
+
+            wxString saveDirectory = m_destinationPath + wxFileName::GetPathSeparator() + relativePath.BeforeLast(wxFileName::GetPathSeparator());
+
+            if (!wxDirExists(saveDirectory))
+            {
+                if (!wxFileName::Mkdir(saveDirectory, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL))
+                {
+                    wxLogError(_("Could not create directory '%s'."), saveDirectory);
+                    return;
+                }
+            }
+
+            wxString thumbFile = currentImagePath.BeforeLast('.') + ".thumb";
+            wxString command = wxString::Format(".\\dcraw.exe -e \"%s\"", currentImagePath);
+
+            if (system(command.c_str()) != 0)
+            {
+                wxLogError(_("Cannot process RAW image '%s'."), currentImagePath);
+                return;
+            }
+
+            wxString finalThumbFile = saveDirectory + wxFileName::GetPathSeparator() + wxFileName(currentImagePath).GetName() + "_thumbnail.jpg";
+            if (!wxRenameFile(thumbFile + ".jpg", finalThumbFile, true))
+            {
+                wxLogError(_("Cannot rename processed RAW image to '%s'."), finalThumbFile);
+                return;
+            }
+
+            imagePathToLoad = finalThumbFile;
+        }
+
+        if (m_image.LoadFile(imagePathToLoad, wxBITMAP_TYPE_ANY))
         {
             UpdateImageSize();
-            wxString wrappedFilename = WrapText(currentImagePath, 40);
+            wxString wrappedFilename = WrapText(imagePathToLoad, 40);
             m_staticText_selected_source->SetLabel(wrappedFilename);
             m_staticText_selected_source->Wrap(m_staticText_selected_source->GetClientSize().GetWidth());
             m_staticText_selected_source->GetParent()->Layout();
+
+            ApplyCompressionAndRefresh(m_compressionLevel);
+
+            // Remove the thumbnail file after loading
+            //if (extension == "cr2" || extension == "nef" || extension == "NEF")
+            //{
+                //wxRemoveFile(imagePathToLoad);
+            //}
         }
         else
         {
-            wxLogError(_("Cannot load image '%s'."), currentImagePath);
+            wxLogError(_("Cannot load image '%s'."), imagePathToLoad);
         }
     }
 }
+
 
 void GUIMyFrame1::ScanDirectory(const wxString& directory)
 {
@@ -123,7 +183,8 @@ void GUIMyFrame1::ScanDirectory(const wxString& directory)
             else
             {
                 wxString extension = wxFileName(filepath).GetExt().Lower();
-                if (extension == "bmp" || extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "tif" || extension == "tiff")
+                if (extension == "bmp" || extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "tif" || extension == "tiff" || extension == "cr2" || extension == "nef" || extension == "NEF")
+
                 {
                     m_imagePaths.push_back(filepath);
                 }
@@ -222,7 +283,7 @@ void GUIMyFrame1::ScanAndCreateDirectories(const wxString& sourceDir, const wxSt
         while (cont)
         {
             wxString extension = wxFileName(filename).GetExt().Lower();
-            if (extension == "bmp" || extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "tif" || extension == "tiff")
+            if (extension == "bmp" || extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "tif" || extension == "tiff" || extension == "cr2" || extension == "nef" || extension == "NEF")
             {
                 hasSupportedFiles = true;
                 break;
@@ -232,7 +293,6 @@ void GUIMyFrame1::ScanAndCreateDirectories(const wxString& sourceDir, const wxSt
 
         if (!hasSupportedFiles && !dir.HasSubDirs())
         {
-            // Skip creating the target directory as the current directory is empty or contains only unsupported files
             continue;
         }
 
@@ -260,7 +320,7 @@ void GUIMyFrame1::m_choice_measurementsOnChoice( wxCommandEvent& event )
     UpdateImageSize();
 }
 
-void GUIMyFrame1::m_choice_compressionOnChoice( wxCommandEvent& event )
+void GUIMyFrame1::m_choice_compressionOnChoice(wxCommandEvent& event)
 {
     wxString selectedCompression = m_choice_compression->GetStringSelection();
     if (selectedCompression == "Very Low")
@@ -283,7 +343,52 @@ void GUIMyFrame1::m_choice_compressionOnChoice( wxCommandEvent& event )
     {
         m_compressionLevel = 100;
     }
+
+    ApplyCompressionAndRefresh(m_compressionLevel);
 }
+
+void GUIMyFrame1::ApplyCompressionAndRefresh(int compressionLevel)
+{
+    if (!m_resizedImage.IsOk())
+        return;
+
+    wxImage tempImage = m_resizedImage.Copy();
+
+    tempImage.SetOption(wxIMAGE_OPTION_QUALITY, compressionLevel);
+
+
+    wxString tempFile = wxFileName::CreateTempFileName("img");
+    if (!tempImage.SaveFile(tempFile, wxBITMAP_TYPE_JPEG))
+    {
+        wxLogError(_("Cannot save the temporary image file."));
+        return;
+    }
+
+    if (!tempImage.LoadFile(tempFile, wxBITMAP_TYPE_JPEG))
+    {
+        wxLogError(_("Cannot reload the image from the temporary file."));
+        return;
+    }
+
+    wxRemoveFile(tempFile);
+
+    wxString selectedSize = m_choice_measurements->GetStringSelection();
+    int maxWidth, maxHeight;
+    int result = sscanf(selectedSize.c_str(), "%d x %d", &maxWidth, &maxHeight);
+    if (result != 2) {
+        wxLogError(_("Failed to parse the dimensions from the selected size."));
+        return;
+    }
+
+    int newWidth, newHeight;
+    CalculateRescaledDimensions(tempImage.GetWidth(), tempImage.GetHeight(), maxWidth, maxHeight, newWidth, newHeight);
+
+    tempImage = tempImage.Rescale(newWidth, newHeight);
+    m_bitmap = wxBitmap(tempImage);
+
+    Repaint();
+}
+
 
 void GUIMyFrame1::m_button_rotation_leftOnButtonClick( wxCommandEvent& event )
 {
@@ -388,64 +493,81 @@ void GUIMyFrame1::UpdateImageSize()
 
     if (m_image.IsOk())
     {
-        int imageWidth = m_image.GetWidth();
-        int imageHeight = m_image.GetHeight();
-
-        double max_aspectRatio = static_cast<double>(maxWidth) / maxHeight;
-        double image_aspectRatio = static_cast<double>(imageWidth) / imageHeight;
         int newWidth, newHeight;
-
-        if (image_aspectRatio > max_aspectRatio)
-        {
-            newWidth = maxWidth;
-            newHeight = static_cast<int>(newWidth / image_aspectRatio);
-        }
-        else
-        {
-            newHeight = maxHeight;
-            newWidth = static_cast<int>(newHeight * image_aspectRatio);
-        }
+        CalculateRescaledDimensions(m_image.GetWidth(), m_image.GetHeight(), maxWidth, maxHeight, newWidth, newHeight);
 
         m_resizedImage = m_image.Copy().Rescale(newWidth, newHeight);
         m_bitmap = wxBitmap(m_resizedImage);
-        m_scrolledWindow1->SetScrollbars(10, 10, m_bitmap.GetWidth() / 10, m_bitmap.GetHeight() / 10);
-        m_scrolledWindow1->SetVirtualSize(m_bitmap.GetWidth(), m_bitmap.GetHeight());
 
-        int toolSizerWidth = 450;
-        int toolSizerHeight = 75;
-        int totalWidth = newWidth + toolSizerWidth;
-        int totalHeight = newHeight + toolSizerHeight;
-        int newFrameWidth = GetSize().GetWidth();
-        int newFrameHeight = GetSize().GetHeight();
+        UpdateWindowSize(newWidth, newHeight);
 
-        if (totalWidth > DEFAULT_WIDTH) {
-            newFrameWidth = totalWidth;
-        }
-        else {
-            newFrameWidth = DEFAULT_WIDTH;
-        }
-
-        if (totalHeight > DEFAULT_HEIGHT) {
-            newFrameHeight = totalHeight;
-        }
-        else {
-            newFrameHeight = DEFAULT_HEIGHT;
-        }
-
-        SetClientSize(wxSize(newFrameWidth, newFrameHeight));
-
-        Repaint();
+        ApplyCompressionAndRefresh(m_compressionLevel);
     }
+}
+
+void GUIMyFrame1::CalculateRescaledDimensions(int originalWidth, int originalHeight, int maxWidth, int maxHeight, int& newWidth, int& newHeight)
+{
+    double max_aspectRatio = static_cast<double>(maxWidth) / maxHeight;
+    double image_aspectRatio = static_cast<double>(originalWidth) / originalHeight;
+
+    if (image_aspectRatio > max_aspectRatio)
+    {
+        newWidth = maxWidth;
+        newHeight = static_cast<int>(newWidth / image_aspectRatio);
+    }
+    else
+    {
+        newHeight = maxHeight;
+        newWidth = static_cast<int>(newHeight * image_aspectRatio);
+    }
+}
+
+void GUIMyFrame1::UpdateWindowSize(int imageWidth, int imageHeight)
+{
+    int toolSizerWidth = 450;
+    int toolSizerHeight = 75;
+    int totalWidth = imageWidth + toolSizerWidth;
+    int totalHeight = imageHeight + toolSizerHeight;
+    int newFrameWidth = GetSize().GetWidth();
+    int newFrameHeight = GetSize().GetHeight();
+
+    if (totalWidth > DEFAULT_WIDTH) {
+        newFrameWidth = totalWidth;
+    }
+    else {
+        newFrameWidth = DEFAULT_WIDTH;
+    }
+
+    if (totalHeight > DEFAULT_HEIGHT) {
+        newFrameHeight = totalHeight;
+    }
+    else {
+        newFrameHeight = DEFAULT_HEIGHT;
+    }
+
+    SetClientSize(wxSize(newFrameWidth, newFrameHeight));
 }
 
 
 
 void GUIMyFrame1::OnPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc(m_scrolledWindow1);
+    wxAutoBufferedPaintDC dc(m_scrolledWindow1);
+    dc.SetBackground(*wxWHITE_BRUSH);
+    dc.Clear();
+
     if (m_bitmap.IsOk())
     {
-        dc.DrawBitmap(m_bitmap, 0, 0, false);
+        int w, h;
+        m_scrolledWindow1->GetClientSize(&w, &h);
+
+        int imgW = m_bitmap.GetWidth();
+        int imgH = m_bitmap.GetHeight();
+
+        int x = (w - imgW) / 2;
+        int y = (h - imgH) / 2;
+
+        dc.DrawBitmap(m_bitmap, x, y, false);
     }
 }
 
@@ -457,10 +579,8 @@ void GUIMyFrame1::OnSize(wxSizeEvent& event)
 
 void GUIMyFrame1::Repaint()
 {
-    wxBitmap bitmap(m_resizedImage);
-    wxClientDC dc(m_scrolledWindow1);
-    m_scrolledWindow1->DoPrepareDC(dc);
-    dc.DrawBitmap(bitmap, 0, 0, true);
+    m_scrolledWindow1->Refresh();
+    m_scrolledWindow1->Update();
 }
 
 void GUIMyFrame1::OnScroll(wxScrollWinEvent& event)
