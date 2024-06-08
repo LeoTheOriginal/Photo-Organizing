@@ -72,7 +72,7 @@ class GUIMyFrame1 : public MyFrame1
 		void LoadImagesFromDirectory(const wxString& directory);
 		void ScanDirectory(const wxString& directory);
 		void UpdateImageCount();
-		void ScanAndCreateDirectories(const wxString& sourceDir, const wxString& destDir);
+		void ScanAndCreateDirectories(const wxString& sourceDir, const wxString& destDir) const;
 		void UpdateProgress();
 
 

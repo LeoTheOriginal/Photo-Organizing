@@ -244,7 +244,7 @@ void GUIMyFrame1::m_button_destination_selectOnButtonClick( wxCommandEvent& even
     }
 }
 
-void GUIMyFrame1::ScanAndCreateDirectories(const wxString& sourceDir, const wxString& destDir)
+void GUIMyFrame1::ScanAndCreateDirectories(const wxString& sourceDir, const wxString& destDir) const
 {
     std::queue<wxString> dirsToProcess;
     dirsToProcess.push(sourceDir);
