@@ -131,11 +131,12 @@
   <ItemGroup>
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="GUIMyFrame1.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h" />
     <ClInclude Include="GUIMyFrame1.h" />
+    <ClInclude Include="MyApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

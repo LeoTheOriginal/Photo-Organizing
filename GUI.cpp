@@ -85,7 +85,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizer_measurements_choice;
 	bSizer_measurements_choice = new wxBoxSizer( wxVERTICAL );
 
-	wxString m_choice_measurementsChoices[] = { wxT("150 x 150"), wxT("250 x 250"), wxT("300 x 200"), wxT("300 x 300"), wxT("400 x 300"), wxT("500 x 500"), wxT("640 x 360"), wxT("1200 x 630"), wxT("1080 x 1080"), wxT("1280 x 720") };
+	wxString m_choice_measurementsChoices[] = { wxT("150 x 150"), wxT("250 x 250"), wxT("300 x 200"), wxT("300 x 300"), wxT("400 x 300"), wxT("500 x 500"), wxT("640 x 360"), wxT("1080 x 1080"), wxT("1200 x 630"), wxT("1280 x 720") };
 	int m_choice_measurementsNChoices = sizeof( m_choice_measurementsChoices ) / sizeof( wxString );
 	m_choice_measurements = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice_measurementsNChoices, m_choice_measurementsChoices, 0 );
 	m_choice_measurements->SetSelection( 0 );
@@ -141,7 +141,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizer_compression_choice;
 	bSizer_compression_choice = new wxBoxSizer( wxVERTICAL );
 
-	wxString m_choice_compressionChoices[] = { wxT("Low"), wxT("Medium"), wxT("High") };
+	wxString m_choice_compressionChoices[] = { wxT("Very Low"), wxT("Low"), wxT("Medium"), wxT("High"), wxT("Very High") };
 	int m_choice_compressionNChoices = sizeof( m_choice_compressionChoices ) / sizeof( wxString );
 	m_choice_compression = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice_compressionNChoices, m_choice_compressionChoices, 0 );
 	m_choice_compression->SetSelection( 0 );
@@ -161,7 +161,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	m_staticText_selected_source_const = new wxStaticText( this, wxID_ANY, wxT("Selected source"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText_selected_source_const->Wrap( -1 );
-	bSizer_selected_source_text_const->Add( m_staticText_selected_source_const, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer_selected_source_text_const->Add( m_staticText_selected_source_const, 1, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 
 	bSizer_selected_source_tools->Add( bSizer_selected_source_text_const, 0, wxEXPAND, 5 );
@@ -171,7 +171,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	m_staticText_selected_source = new wxStaticText( this, wxID_ANY, wxT("Not selected"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText_selected_source->Wrap( -1 );
-	bSizer_selected_source_text->Add( m_staticText_selected_source, 0, wxALL, 5 );
+	bSizer_selected_source_text->Add( m_staticText_selected_source, 0, wxALL | wxEXPAND, 5 );
 
 
 	bSizer_selected_source_tools->Add( bSizer_selected_source_text, 0, wxEXPAND, 5 );
@@ -187,7 +187,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	m_staticText_selected_destination_const = new wxStaticText( this, wxID_ANY, wxT("Selected destination directory"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText_selected_destination_const->Wrap( -1 );
-	bSizer_selected_destination_text_const->Add( m_staticText_selected_destination_const, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer_selected_destination_text_const->Add( m_staticText_selected_destination_const, 1, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 
 	bSizer_selected_destination_tools->Add( bSizer_selected_destination_text_const, 0, wxEXPAND, 5 );
@@ -261,7 +261,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer_rotation_left_button->Add( m_button_rotation_left, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 
-	bSizer_preview_tools->Add( bSizer_rotation_left_button, 1, wxEXPAND, 5 );
+	bSizer_preview_tools->Add( bSizer_rotation_left_button, 0, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer_rotation_right_button;
 	bSizer_rotation_right_button = new wxBoxSizer( wxVERTICAL );
@@ -270,7 +270,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer_rotation_right_button->Add( m_button_rotation_right, 0, wxALL, 5 );
 
 
-	bSizer_preview_tools->Add( bSizer_rotation_right_button, 1, wxEXPAND, 5 );
+	bSizer_preview_tools->Add( bSizer_rotation_right_button, 0, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer_next_thumbnail_button;
 	bSizer_next_thumbnail_button = new wxBoxSizer( wxVERTICAL );
@@ -279,7 +279,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer_next_thumbnail_button->Add( m_button_next_thumbnail, 0, wxALL, 5 );
 
 
-	bSizer_preview_tools->Add( bSizer_next_thumbnail_button, 1, wxEXPAND, 5 );
+	bSizer_preview_tools->Add( bSizer_next_thumbnail_button, 0, wxEXPAND, 5 );
 
 
 	bSizer_preview->Add( bSizer_preview_tools, 0, wxEXPAND, 5 );
