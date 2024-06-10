@@ -1,6 +1,6 @@
 ﻿#include "GUIMyFrame1.h"
 
-static wxString WrapText(const wxString& text, size_t maxLineLength)
+wxString GUIMyFrame1::WrapText(const wxString& text, size_t maxLineLength)
 {
     wxString result;
     size_t length = text.length();

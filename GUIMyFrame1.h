@@ -197,6 +197,14 @@ private:
      */
     void UpdateProgress();
 
+    /**
+     * @brief Wraps text to a specified maximum line length.
+     * @param text The text to wrap.
+     * @param maxLineLength The maximum line length.
+     * @return The wrapped text.
+     */
+    static wxString WrapText(const wxString& text, size_t maxLineLength);
+
     static const int DEFAULT_WIDTH = 900;  ///< The default width of the frame.
     static const int DEFAULT_HEIGHT = 600; ///< The default height of the frame.
 };
