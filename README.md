@@ -11,7 +11,6 @@
 - [Skrócona instrukcja obsługi](#skrócona-instrukcja-obsługi)
 - [Struktura projektu](#struktura-projektu)
 - [Możliwe usprawnienia](#możliwe-usprawnienia)
-- [Autor](#autor)
 
 ---
 
